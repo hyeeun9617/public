@@ -9,25 +9,28 @@
 
 <body>
     <div id= "app">
-        <h1>{{ title }}</h1>
-        <p>{{ body }}</p>
+        <h1>{{ name }}</h1>
+        <p>{{ email }}</p>
+        <p> {{number}}</p>
     </div>
 
     <script type = "text/javascript">
     var app = new Vue({
         el: '#app',
          data: {
-            title: 'hello world',
-            body: 'good morning'
+            name : 'ddd',
+            email,
+            number
         }
     })
 
     window.onload = function () {
-        let helloRef = firebase.database().ref("hello");
+        let helloRef = firebase.database().ref("myinfo");
         helloRef.on('value', (snapshot) => {
-          let hello = snapshot.val();
-          app.title = hello.title;
-          app.body = hello.body;
+          let myinfo = snapshot.val();
+          app.name = myinfo.name;
+          app.email = myinfo.email;
+          app.number = myinfo.number;
         });
     };
     
