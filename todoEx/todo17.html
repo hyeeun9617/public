@@ -1,0 +1,82 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="todo.css">
+    <style>
+        ul {
+            list-style-type: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>할 일</h1>
+       
+        <ul>
+            <li v-for="(todo, index) in todoList" v-bind:key="index">
+                <input type="checkbox" v-model="checked[index]" />
+                {{ todo.title }}
+
+            </li>
+        </ul>
+        <input type="text" v-model.trim="todo.title" />
+        <button type="button" v-on:click="save" v-bind:disabled="!todo.title"> 추가</button>
+        <button type="button" v-on:click="remove" v-show="checkedCount > 0">삭제</button>
+
+    </div>
+
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                todoList: {},
+                checked: [],
+                todo: {},
+                selectedKey: null
+            },
+            computed: {
+                checkedCount: function () {
+                    let count = 0;
+                    for (let i = 0; i < Object.keys(this.checked).length; ++i) {
+                        var key = Object.keys(this.checked)[i];
+                        if (this.checked[key]) ++count;
+                    }
+                    return count;
+                }
+            },
+            methods: {
+                save: function () {
+                        axios.post('https://hyeeunlee9617.firebaseio.com/todo.json/', this.todo)
+                            .then(response => this.reload());
+                            this.todo={};
+                },
+                reload: function () {
+                    axios.get('https://hyeeunlee9617.firebaseio.com/todo.json/')
+                        .then(response => app.todoList = response.data);
+                },
+                
+                remove: function () {
+                    if (confirm("삭제하시겠습니까?") == false) return;
+                    for (let i = 0; i < Object.keys(this.checked).length; i++) {
+                        this.selectedKey = Object.keys(this.checked)[i];
+                        if (this.checked[this.selectedKey])
+                            axios.delete('https://hyeeunlee9617.firebaseio.com/todo/' + this.selectedKey + '.json')
+                                .then(response => this.reload());
+                    }
+                    this.selectedKey = null;
+                    this.checked = [];
+                }
+            }
+        })
+
+        window.onload = function () {
+            app.reload();
+        }
+    </script>
+</body>
+
+</html>
